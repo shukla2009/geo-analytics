@@ -1,6 +1,7 @@
 package com.avalia.analytics.client
 
 import akka.actor.{ActorSystem, Props}
+import com.typesafe.config.ConfigFactory
 
 import scala.io.StdIn
 
@@ -19,7 +20,11 @@ object Client extends App {
   var input = StdIn.readLine()
   while (!"exit".equals(input)) {
     input.trim.split(" ").toList match {
-      case "FIND" :: uid1 :: uid2 :: sc :: Nil => client ! Find(uid1, uid2, sc)
+      case "FIND" :: uid1 :: uid2 :: sc :: Nil if List("S", "SS", "CSS").contains(sc) =>
+        if ("CSS".equals(sc) && ConfigFactory.load().getString("cassandra.pass").isEmpty)
+          println("Cassandra mode not enabled please set cassandra.pass=<cassandra password> in application.conf")
+        else
+          client ! Find(uid1, uid2, sc)
       case "FIND" :: uid1 :: uid2 :: Nil => client ! Find(uid1, uid2)
       case _ => println("Not Supported")
     }

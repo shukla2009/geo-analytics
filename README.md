@@ -2,6 +2,7 @@
     
     => Scalla 2.11.x
     => Java 1.8.x
+    => sbt 0.13.15
     
 # Note : 
 
@@ -51,13 +52,16 @@ This project contain 3 way to solve the geo-analytics problem
     
 **injestion (Optional)**
 
-     $/<project> sbt injest/run -Davalia.data=<csv file location> -Dcassandra.host=<cassandra host> 
-     -Dcassandra.user=<cassandra user> -Dcassandra.pass=<cassandra password> 
+     
+     set avalia.data=<data file location>
+     set cassandra.pass=<cassdandra password in application.conf> 
+     $/<project> sbt injest/run 
     
 **clent**
 
-     $/<project> sbt client/run -Davalia.data=<csv file location> -Dcassandra.host=<cassandra host> 
-     -Dcassandra.user=<cassandra user> -Dcassandra.pass=<cassandra password>
+     set avalia.data=<data file location>
+     set cassandra.pass=<cassdandra password in application.conf> (Optional if you want to run cassandra mode) 
+     $/<project> sbt client/run 
      
 Query
 
