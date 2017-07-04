@@ -1,0 +1,9 @@
+.idea
+target
+client/target
+core/target
+injest/target
+spark-warehouse
+temp
+*.log
+*.csv
