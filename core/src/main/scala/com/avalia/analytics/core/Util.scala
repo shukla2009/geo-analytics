@@ -1,7 +1,5 @@
 package com.avalia.analytics.core
 
-import java.io.{BufferedWriter, File, FileWriter}
-
 /**
   * Utilty to find meetings between two point
   * Created by Rahul Shukla <shukla2009@gmail.com> on 3/7/17.
@@ -38,41 +36,20 @@ object Util {
   /**
     * Find all meets between two users
     *
-    * @param u1        User 1 Records
-    * @param u2        User 2 Records
-    * @param lastLocU1 Last Location of user 1
-    * @param lastLocU2 Last location of User 2
-    * @param points    accumulator to collect meeting points
+    * @param u1     User 1 Records
+    * @param u2     User 2 Records
+    * @param points accumulator to collect meeting points
     * @return meeting point between given users
     */
-  private def getMeetings(u1: List[Record], u2: List[Record], lastLocU1: Record, lastLocU2: Record,
-                          points: List[(Record, Record)]): List[(Record, Record)] = {
-
-    if (u1.isEmpty || u2.isEmpty) {
-      if (whetherMeet(lastLocU1, lastLocU2)) {
-        points :+ (lastLocU1, lastLocU2)
-      } else {
-        points
-      }
-    } else if (lastLocU1 == null || lastLocU2 == null)
-      getMeetings(u1.tail, u2.tail, u1.head, u2.head, points)
-    else if (u1.head.timestamp.before(lastLocU2.timestamp)) {
-      getMeetings(u1.tail, u2, u1.head, lastLocU2, points)
-    } else if (u2.head.timestamp.before(lastLocU1.timestamp)) {
-      getMeetings(u1, u2.tail, lastLocU1, u2.head, points)
-    }
-    else if (whetherMeet(lastLocU1, lastLocU2))
-      if (u1.head.timestamp.after(u2.head.timestamp)) {
-        getMeetings(u1, u2.tail, lastLocU1, u2.head, points :+ (lastLocU1, lastLocU2))
-      } else {
-        getMeetings(u1.tail, u2, u1.head, lastLocU2, points :+ (lastLocU1, lastLocU2))
-      }
-    else {
-      if (u1.head.timestamp.after(u2.head.timestamp)) {
-        getMeetings(u1, u2.tail, lastLocU1, u2.head, points)
-      } else {
-        getMeetings(u1.tail, u2, u1.head, lastLocU2, points)
-      }
+  private def getMeetings(u1: List[Record], u2: List[Record], points: List[(Record, Record)]): List[(Record, Record)] = {
+    (u1, u2) match {
+      case (Nil, Nil) | (_, Nil) | (Nil, _) => points
+      case (h1 :: t1, l@(h2 :: t2)) if t1.nonEmpty && t1.head.timestamp.before(h2.timestamp) => getMeetings(t1, l, points)
+      case (l@(h1 :: t1), h2 :: t2) if t2.nonEmpty && t2.head.timestamp.before(h1.timestamp) => getMeetings(l, t2, points)
+      case (l1@(h1 :: t1), l2@(h2 :: t2)) if whetherMeet(h1, h2) =>
+        if (h1.timestamp.after(h2.timestamp)) getMeetings(l1, t2, points :+ (h1, h2)) else getMeetings(t1, l2, points :+ (h1, h2))
+      case (l1@(h1 :: t1), l2@(h2 :: t2)) =>
+        if (h1.timestamp.after(h2.timestamp)) getMeetings(l1, t2, points) else getMeetings(t1, l2, points)
     }
   }
 
@@ -84,7 +61,7 @@ object Util {
     * @return Meetings points
     */
   def findMeeting(user1Records: List[Record], user2Records: List[Record]): List[(Record, Record)] = {
-    getMeetings(user1Records, user2Records, null, null, List.empty[(Record, Record)])
+    getMeetings(user1Records, user2Records, List.empty[(Record, Record)])
   }
 
   /**
@@ -99,8 +76,18 @@ object Util {
     */
   def formatResult(uid1: String, uid2: String, points: List[(Record, Record)], start: Long, end: Long): String = {
     s"UID : ($uid1,$uid2)\n" +
-      s"Time Consumed : ${end - start}ms\n" +
-      s"Number of Meets : ${points.length}\n" +
-      s"Metting Points\n${points.map(p => s"${p._1.toString}\n${p._2.toString}").mkString("\n\n")}\n"
+      s"Time Consumed : ${
+        end - start
+      }ms\n" +
+      s"Number of Meets : ${
+        points.length
+      }\n" +
+      s"Metting Points\n${
+        points.map(p => s"${
+          p._1.toString
+        }\n${
+          p._2.toString
+        }").mkString("\n\n")
+      }\n"
   }
 }
