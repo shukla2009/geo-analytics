@@ -1,7 +1,5 @@
 package com.avalia.analytics.core
 
-import java.sql.Timestamp
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 import akka.actor.{Actor, ActorLogging}
@@ -27,7 +25,7 @@ class OnlyScalaSolution extends Actor with ActorLogging {
     .map(l => l.split(","))
     .map(arr =>
       Record(
-        timestamp = Timestamp.valueOf(LocalDateTime.parse(arr(0), dtf)),
+        ts = arr(0),
         x = arr(1).toDouble,
         y = arr(2).toDouble,
         floor = arr(3).toInt,
@@ -44,6 +42,9 @@ class OnlyScalaSolution extends Actor with ActorLogging {
       val result = Util.formatResult(uid1, uid2, meetings, start, end)
       log.info(result)
       sender() ! result
+    case Message.FindMeetingRaw(uid1, uid2) =>
+      val meetings = Util.findMeeting(data.getOrElse(uid1, List.empty[Record]), data.getOrElse(uid2, List.empty[Record]))
+      sender() ! meetings
     case _ => //Do Nothing
   }
 }

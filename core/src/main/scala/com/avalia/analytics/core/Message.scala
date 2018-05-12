@@ -6,5 +6,6 @@ package com.avalia.analytics.core
 object Message {
 
   case class FindMeeting(uid1: String, uid: String)
+  case class FindMeetingRaw(uid1: String, uid: String)
 
 }

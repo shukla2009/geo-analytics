@@ -50,6 +50,7 @@ object Dependencies {
     spark.sql,
     spark.cassandra,
     akka.actor,
+    akka.testkit,
     library.check
   )
 
